@@ -1,0 +1,54 @@
+version: '3.7'
+services:
+
+  php:
+    build:
+      context: ./docker/images/php
+      args:
+        APP_ENV: 'DEVELOPMENT'
+    environment:
+      XDEBUG_CONFIG: remote_host=172.22.0.1
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/images/php/php.ini:/usr/local/etc/php/php.ini
+      - ./docker/images/php/permission.sh:/usr/local/bin/permission.sh
+    depends_on:
+      - db
+
+  db:
+    # una-db
+    image: mariadb:10.3
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./data/dump:/db-dump:ro
+      - ./data/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+    # add mysql ports for connect to db container use localhost:3306
+    ports:
+      - '3306:3306'
+
+  nginx:
+    build:
+      context: ./docker/images/nginx
+      args:
+        NGINX_REMOTE_PORT: 8080
+    links:  
+      - php
+    ports:
+      - '8080:80'
+    networks:
+      default:
+        aliases:
+          - "dsk.local"
+    volumes:
+      - ./src:/var/www/html
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    #container_name: promlk-myadmin
+    ports:
+      - 8888:80
+
+    links:
+      - db

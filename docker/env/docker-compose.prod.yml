@@ -1,0 +1,43 @@
+version: '3.7'
+services:
+
+  php:
+    build:
+      context: ./docker/images/php
+      args:
+        APP_ENV: 'PRODUCTION'
+    volumes:
+      - ./src:/var/www/html
+      - ./docker/images/php/php.ini:/usr/local/etc/php/php.ini
+      - ./docker/images/php/permission.sh:/usr/local/bin/permission.sh
+    depends_on:
+      - db
+
+  db:
+    # una-db
+    image: mariadb:10.3
+    environment:
+      MYSQL_ROOT_PASSWORD: toor
+    volumes:
+      - ./data/mysql:/var/lib/mysql
+      - ./data/dump:/db-dump:ro
+      - ./data/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
+    # add mysql ports for connect to db container use localhost:3306
+    ports:
+      - '3306:3306'
+
+  nginx:
+    build:
+      context: ./docker/images/nginx
+      args:
+        NGINX_REMOTE_PORT: 80
+    links:  
+      - php
+    ports:
+     - '80:80'
+    networks:
+      default:
+        aliases:
+          - "dsk.prod"
+    volumes:
+      - ./src:/var/www/html
