@@ -16,7 +16,6 @@ services:
       - db
 
   db:
-    # una-db
     image: mariadb:10.3
     environment:
       MYSQL_ROOT_PASSWORD: toor
@@ -24,7 +23,6 @@ services:
       - ./data/mysql:/var/lib/mysql
       - ./data/dump:/db-dump:ro
       - ./data/init.sh:/docker-entrypoint-initdb.d/init.sh:ro
-    # add mysql ports for connect to db container use localhost:3306
     ports:
       - '3306:3306'
 
@@ -46,7 +44,6 @@ services:
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    #container_name: promlk-myadmin
     ports:
       - 8888:80
 

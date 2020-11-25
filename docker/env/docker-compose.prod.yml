@@ -14,7 +14,6 @@ services:
       - db
 
   db:
-    # una-db
     image: mariadb:10.3
     environment:
       MYSQL_ROOT_PASSWORD: toor
